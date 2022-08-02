@@ -24,6 +24,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+
 import pathlib
 import os
 import re
@@ -41,7 +42,10 @@ if on_rtd:
         requirements.extend(f.read().splitlines())
 
 with open(ROOT / "wavelink" / "__init__.py", encoding="utf-8") as f:
-    VERSION = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    VERSION = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE
+    )[1]
+
 
 readme = ""
 with open("README.rst") as f:

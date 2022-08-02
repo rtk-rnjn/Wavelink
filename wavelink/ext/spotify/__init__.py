@@ -82,8 +82,7 @@ def decode_url(url: str) -> Optional[dict]:
         if decoded and decoded['type'] is spotify.SpotifySearchType.track:
             track = await spotify.SpotifyTrack.search(query=decoded["id"], type=decoded["type"])
     """
-    match = URLREGEX.match(url)
-    if match:
+    if match := URLREGEX.match(url):
         try:
             type_ = SpotifySearchType[match['type']]
         except KeyError:
@@ -225,10 +224,13 @@ class SpotifyClient:
 
         regex_result = URLREGEX.match(query)
 
-        if not regex_result:
-            url = BASEURL.format(entity=type.name, identifier=query)
-        else:
-            url = BASEURL.format(entity=regex_result['type'], identifier=regex_result['id'])
+        url = (
+            BASEURL.format(
+                entity=regex_result['type'], identifier=regex_result['id']
+            )
+            if regex_result
+            else BASEURL.format(entity=type.name, identifier=query)
+        )
 
         async with self.session.get(url, headers=self.bearer_headers) as resp:
             if resp.status != 200:
@@ -239,12 +241,12 @@ class SpotifyClient:
             if data['type'] == 'track':
                 return await wavelink.YouTubeTrack.search(f'{data["name"]} - {data["artists"][0]["name"]}')
 
-            elif data['type'] == 'album' and iterator is False:
+            elif data['type'] == 'album' and not iterator:
                 tracks = data['tracks']['items']
                 return [(await wavelink.YouTubeTrack.search(f'{t["name"]} - {t["artists"][0]["name"]}'))[0]
                         for t in tracks]
 
-            elif data['type'] == 'playlist' and iterator is False:
+            elif data['type'] == 'playlist' and not iterator:
                 ret = []
                 tracks = data['tracks']['items']
 
@@ -254,24 +256,23 @@ class SpotifyClient:
 
                 return ret
 
-        if iterator is True:
+        if iterator:
             if data['type'] == 'playlist':
-                if data['tracks']['next']:
-                    url = data['tracks']['next']
-
-                    items = [t['track'] for t in data['tracks']['items']]
-                    while True:
-                        async with self.session.get(url, headers=self.bearer_headers) as resp:
-                            data = await resp.json()
-
-                            items.extend([t['track'] for t in data['items']])
-                            if not data['next']:
-                                return items
-
-                            url = data['next']
-                else:
+                if not data['tracks']['next']:
                     return [t['track'] for t in data['tracks']['items']]
 
+                url = data['tracks']['next']
+
+                items = [t['track'] for t in data['tracks']['items']]
+                while True:
+                    async with self.session.get(url, headers=self.bearer_headers) as resp:
+                        data = await resp.json()
+
+                        items.extend([t['track'] for t in data['items']])
+                        if not data['next']:
+                            return items
+
+                        url = data['next']
             return data['tracks']['items']
 
 
@@ -312,11 +313,7 @@ class SpotifyTrack(YouTubeTrack):
         if type == SpotifySearchType.track:
             tracks = await node._spotify._search(query=query, type=type)
 
-            if return_first:
-                return tracks[0]
-
-            return tracks
-
+            return tracks[0] if return_first else tracks
         return await node._spotify._search(query=query, type=type)
 
     @classmethod

@@ -135,7 +135,7 @@ class Websocket:
                 asyncio.create_task(self.process_data(msg.json()))
 
     async def process_data(self, data: Dict[str, Any]) -> None:
-        op = data.get("op", None)
+        op = data.get("op")
         if not op:
             return
 
@@ -155,7 +155,7 @@ class Websocket:
         if op == 'event':
             event, payload = await self._get_event_payload(data['type'], data)
             logger.debug(f'op: event:: {data}')
-            
+
             if event == 'track_end' and payload.get('reason') != 'REPLACED':
                 player._source = None
 

@@ -100,8 +100,9 @@ class PyAttributeTable(SphinxDirective):
                 modulename = self.env.ref_context.get("py:module")
         if modulename is None:
             raise RuntimeError(
-                "modulename somehow None for %s in %s." % (content, self.env.docname)
+                f"modulename somehow None for {content} in {self.env.docname}."
             )
+
 
         return modulename, name
 
@@ -135,7 +136,7 @@ class PyAttributeTable(SphinxDirective):
         modulename, name = self.parse_name(content)
         node["python-module"] = modulename
         node["python-class"] = name
-        node["python-full-name"] = "%s.%s" % (modulename, name)
+        node["python-full-name"] = f"{modulename}.{name}"
         return [node]
 
 
@@ -212,7 +213,7 @@ def get_class_results(lookup, modulename, name, fullname):
         return groups
 
     for attr in members:
-        attrlookup = "%s.%s" % (fullname, attr)
+        attrlookup = f"{fullname}.{attr}"
         key = _("Attributes")
         badge = None
         label = attr
@@ -230,7 +231,7 @@ def get_class_results(lookup, modulename, name, fullname):
                 badge["badge-type"] = _("coroutine")
             elif isinstance(value, classmethod):
                 key = _("Methods")
-                label = "%s.%s" % (name, attr)
+                label = f"{name}.{attr}"
                 badge = attributetablebadge("cls", "cls")
                 badge["badge-type"] = _("classmethod")
             elif inspect.isfunction(value):
@@ -257,10 +258,11 @@ def class_results_to_node(key, elements):
             "",
             "",
             internal=True,
-            refuri="#" + element.fullname,
+            refuri=f"#{element.fullname}",
             anchorname="",
-            *[nodes.Text(element.label)]
+            *[nodes.Text(element.label)],
         )
+
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:
             ul.append(attributetable_item("", element.badge, para))
