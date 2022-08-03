@@ -157,7 +157,7 @@ async def download(location: pathlib.Path, *, url: str) -> None:
 
 
 def parse_input(value: str, type_: typing.Any) -> typing.Union[str, int, bool, None]:
-    value = str(value)
+    value = value
 
     quits = ('q', 'quit', 'exit')
     if value.lower() in quits:
@@ -167,7 +167,7 @@ def parse_input(value: str, type_: typing.Any) -> typing.Union[str, int, bool, N
     if type_ is bool:
 
         bools = {'y': True, 'yes': True, 'true': True, 'n': False, 'no': False, 'false': False}
-        result = bools.get(value.lower(), None)
+        result = bools.get(value.lower())
 
         return result
 

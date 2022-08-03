@@ -62,10 +62,10 @@ class Music(commands.Cog):
 
         If not connected, connect to our voice channel.
         """
-        if not ctx.voice_client:
-            vc: wavelink.Player = await ctx.author.voice.channel.connect(cls=wavelink.Player)
-        else:
-            vc: wavelink.Player = ctx.voice_client
+        vc: wavelink.Player = (
+            ctx.voice_client
+            or await ctx.author.voice.channel.connect(cls=wavelink.Player)
+        )
 
         await vc.play(search)
 

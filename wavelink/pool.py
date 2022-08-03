@@ -145,17 +145,11 @@ class Node:
     @property
     def penalty(self) -> float:
         """The load-balancing penalty for this node."""
-        if self.stats is None:
-            return 9e30
-
-        return self.stats.penalty.total
+        return 9e30 if self.stats is None else self.stats.penalty.total
 
     def is_connected(self) -> bool:
         """Bool indicating whether or not this Node is currently connected to Lavalink."""
-        if self._websocket is MISSING:
-            return False
-
-        return self._websocket.is_connected()
+        return False if self._websocket is MISSING else self._websocket.is_connected()
 
     async def _connect(self) -> None:
         self._websocket = Websocket(node=self)
@@ -305,11 +299,7 @@ class Node:
         -------
         Optional[:class:`Player`]
         """
-        for player in self.players:
-            if player.guild == guild:
-                return player
-
-        return None
+        return next((player for player in self.players if player.guild == guild), None)
 
     async def disconnect(self, *, force: bool = False) -> None:
         """Disconnect this Node and remove it from the NodePool.
